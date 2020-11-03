@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ProductModelServer, serverResponse } from 'src/app/models/product.model';
+import { ProductModelServer, ServerResponse } from 'src/app/models/product.model';
 import { ProductService } from 'src/app/services/product.service';
 
 @Component({
@@ -16,7 +16,7 @@ export class HomeComponent implements OnInit {
               private router: Router) { }
 
   ngOnInit(): void {
-    this.productService.getAllProducts().subscribe((prods: serverResponse ) => {
+    this.productService.getAllProducts().subscribe((prods: ServerResponse ) => {
       this.products = prods.products;
     });
   }
