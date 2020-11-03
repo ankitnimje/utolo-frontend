@@ -9,7 +9,7 @@ export interface ProductModelServer {
   images: string;
 }
 
-export interface ServerResponse {
+export interface serverResponse {
   count: number;
   products: ProductModelServer[];
 }
