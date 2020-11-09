@@ -15,7 +15,7 @@ export interface CartModelPublic {
   prodData: [
     {
       id: number,
-      inCart: number
+      incart: number
     }
   ];
 }
