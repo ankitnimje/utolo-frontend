@@ -7,6 +7,8 @@ import {CartModelPublic, CartModelServer} from '../models/cart.model';
 import {BehaviorSubject} from 'rxjs';
 import {NavigationExtras, Router} from '@angular/router';
 import {ProductModelServer} from '../models/product.model';
+import { ToastrService } from 'ngx-toastr';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Injectable({
   providedIn: 'root'
@@ -40,7 +42,9 @@ export class CartService {
   constructor(private http: HttpClient,
               private productService: ProductService,
               private orderService: OrderService,
-              private router: Router) {
+              private router: Router,
+              private toast: ToastrService,
+              private spinner: NgxSpinnerService) {
 
     this.cartTotal$.next(this.cartDataServer.total);
     this.cartData$.next(this.cartDataServer);
@@ -93,7 +97,13 @@ export class CartService {
         this.cartDataClient.total = this.cartDataServer.total;
         localStorage.setItem('cart', JSON.stringify(this.cartDataClient));
         this.cartData$.next({...this.cartDataServer});
-        //  TODO DISPLAY A TOAST NOTIFICATION
+
+        this.toast.success(`${prod.name} added to the cart`, `Product Added`, {
+          timeOut: 1500,
+          progressBar: false,
+          progressAnimation: 'increasing',
+          positionClass: 'toast-top-right'
+        });
       }
       //  2.  If the cart has some items
       else {
@@ -104,14 +114,25 @@ export class CartService {
           if (quantity !== undefined && quantity <= prod.quantity) {
             this.cartDataServer.data[index].numInCart = this.cartDataServer.data[index].numInCart < prod.quantity ? quantity : prod.quantity;
           } else {
-            this.cartDataServer.data[index].numInCart = this.cartDataServer.data[index].numInCart < prod.quantity ? this.cartDataServer.data[index].numInCart++ : prod.quantity;
+            this.cartDataServer.data[index].numInCart < prod.quantity ? this.cartDataServer.data[index].numInCart++ : prod.quantity;
           }
 
           this.cartDataClient.prodData[index].inCart = this.cartDataServer.data[index].numInCart;
-          //  TODO DISPLAY A TOAST NOTIFICATION
+          this.CalculateTotal();
+          this.cartDataClient.total = this.cartDataServer.total;
+          localStorage.setItem('cart', JSON.stringify(this.cartDataClient));
+          this.toast.info(`${prod.name} quantity updated in the cart`, `Product Updated`, {
+            timeOut: 1500,
+            progressBar: false,
+            progressAnimation: 'increasing',
+            positionClass: 'toast-top-right'
+          });
 
-        }  // END OF IF
-        //     b. if that item is not in the cart
+        }
+
+        // If product is not in the cart array
+
+
         else {
           this.cartDataServer.data.push({
             numInCart: 1,
@@ -123,7 +144,12 @@ export class CartService {
             id: prod.id
           });
 
-          //  TODO DISPLAY A TOAST NOTIFICATION
+          this.toast.success(`${prod.name} added to the cart`, `Product Added`, {
+            timeOut: 1500,
+            progressBar: false,
+            progressAnimation: 'increasing',
+            positionClass: 'toast-top-right'
+          });
 
           this.CalculateTotal();
           this.cartDataClient.total = this.cartDataServer.total;
@@ -208,7 +234,8 @@ export class CartService {
                 }
               };
 
-              // TODO HIDE SPINNER
+              this.spinner.hide();
+
               this.router.navigate(['/thankyou'], navigationExtras).then(p => {
                 this.cartDataClient = {total: 0, prodData: [{inCart: 0, id: 0}]};
                 this.cartTotal$.next(0);
@@ -216,6 +243,15 @@ export class CartService {
               });
             }
           });
+        });
+      } else {
+        this.spinner.hide();
+        this.router.navigateByUrl('/checkout').then();
+        this.toast.error(`Sorry. Failed process the order`, `Order Status`, {
+          timeOut: 1500,
+          progressBar: false,
+          progressAnimation: 'increasing',
+          positionClass: 'toast-top-right'
         });
       }
     });
@@ -246,7 +282,18 @@ export class CartService {
 
     this.cartData$.next({...this.cartDataServer});
   }
+
+  CalculateSubTotal(index): number {
+    let subTotal = 0;
+
+    const p = this.cartDataServer.data[index];
+    // @ts-ignore
+    subTotal = p.product.price * p.numInCart;
+
+    return subTotal;
+  }
 }
+
 
 
 interface OrderResponse {
