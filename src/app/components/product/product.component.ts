@@ -114,7 +114,6 @@ export class ProductComponent implements OnInit, AfterViewInit {
 
     this.quantityInput.nativeElement.value = value.toString();
   }
-
   addToCart(id: number) {
     this.cartService.AddProductToCart(id, this.quantityInput.nativeElement.value);
   }

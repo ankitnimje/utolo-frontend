@@ -14,6 +14,22 @@ import { ThankyouComponent } from './components/thankyou/thankyou.component';
 import { HttpClientModule } from '@angular/common/http';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { ToastrModule } from 'ngx-toastr';
+import { ProfileComponent } from './components/profile/profile.component';
+import { LoginComponent } from './components/login/login.component';
+import { SocialLoginModule, AuthServiceConfig } from "angularx-social-login";
+import { GoogleLoginProvider } from "angularx-social-login";
+import { FormsModule } from '@angular/forms';
+
+let config = new AuthServiceConfig([
+  {
+    id: GoogleLoginProvider.PROVIDER_ID,
+    provider: new GoogleLoginProvider("448955600749-cnjip8vi5delhg8spo370gnpdlhvp0j4.apps.googleusercontent.com")
+  }
+]);
+
+export function provideConfig() {
+  return config;
+}
 
 @NgModule({
   declarations: [
@@ -24,7 +40,9 @@ import { ToastrModule } from 'ngx-toastr';
     CheckoutComponent,
     HomeComponent,
     ProductComponent,
-    ThankyouComponent
+    ThankyouComponent,
+    ProfileComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
@@ -32,10 +50,17 @@ import { ToastrModule } from 'ngx-toastr';
     AppRoutingModule,
     HttpClientModule,
     NoopAnimationsModule,
+    FormsModule,
     NgxSpinnerModule,
-    ToastrModule.forRoot()
+    ToastrModule.forRoot(),
+    SocialLoginModule
   ],
-  providers: [],
+  providers: [
+    {
+      provide: AuthServiceConfig,
+      useFactory: provideConfig
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
